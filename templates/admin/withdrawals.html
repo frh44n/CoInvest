@@ -1,0 +1,254 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Admin: Withdrawals{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Withdrawal Management</h2>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light">
+                <i class="fas fa-tachometer-alt me-1"></i> Back to Dashboard
+            </a>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow mb-4">
+            <div class="card-header bg-transparent">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Withdrawals</h5>
+                    <div>
+                        <select id="status-filter" class="form-select form-select-sm">
+                            <option value="all" {{ 'selected' if current_filter == 'all' else '' }}>All</option>
+                            <option value="pending" {{ 'selected' if current_filter == 'pending' else '' }}>Pending</option>
+                            <option value="approved" {{ 'selected' if current_filter == 'approved' else '' }}>Approved</option>
+                            <option value="rejected" {{ 'selected' if current_filter == 'rejected' else '' }}>Rejected</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if withdrawals %}
+                <div class="table-responsive">
+                    <table class="table table-hover data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Wallet</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for withdrawal in withdrawals %}
+                            <tr>
+                                <td>{{ withdrawal.id }}</td>
+                                <td>
+                                    <a href="{{ url_for('admin.view_user', user_id=withdrawal.user_id) }}">
+                                        {{ withdrawal.user.username }}
+                                    </a>
+                                </td>
+                                <td>${{ withdrawal.amount|round(2) }}</td>
+                                <td title="{{ withdrawal.wallet_address }}">{{ withdrawal.wallet_address[:10] }}...</td>
+                                <td>{{ withdrawal.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    {% if withdrawal.status == 'pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                    {% elif withdrawal.status == 'approved' %}
+                                    <span class="badge bg-success">Approved</span>
+                                    {% elif withdrawal.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if withdrawal.status == 'pending' %}
+                                    <div class="btn-group">
+                                        <form action="{{ url_for('admin.approve_withdrawal', withdrawal_id=withdrawal.id) }}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success" data-confirm="Are you sure you want to approve this withdrawal?">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ url_for('admin.reject_withdrawal', withdrawal_id=withdrawal.id) }}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-danger" data-confirm="Are you sure you want to reject this withdrawal?">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#withdrawalDetails{{ withdrawal.id }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    {% else %}
+                                    <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#withdrawalDetails{{ withdrawal.id }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% endif %}
+                                    
+                                    <!-- Withdrawal Details Modal -->
+                                    <div class="modal fade" id="withdrawalDetails{{ withdrawal.id }}" tabindex="-1" aria-labelledby="withdrawalDetailsLabel{{ withdrawal.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content bg-dark">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="withdrawalDetailsLabel{{ withdrawal.id }}">Withdrawal Details</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <ul class="list-group bg-dark">
+                                                        <li class="list-group-item bg-dark d-flex justify-content-between">
+                                                            <span>Withdrawal ID</span>
+                                                            <strong>{{ withdrawal.id }}</strong>
+                                                        </li>
+                                                        <li class="list-group-item bg-dark d-flex justify-content-between">
+                                                            <span>User</span>
+                                                            <strong>{{ withdrawal.user.username }}</strong>
+                                                        </li>
+                                                        <li class="list-group-item bg-dark d-flex justify-content-between">
+                                                            <span>Amount</span>
+                                                            <strong>${{ withdrawal.amount|round(2) }}</strong>
+                                                        </li>
+                                                        <li class="list-group-item bg-dark">
+                                                            <span>Wallet Address</span>
+                                                            <div class="mt-2">
+                                                                <div class="input-group">
+                                                                    <input type="text" class="form-control" value="{{ withdrawal.wallet_address }}" readonly>
+                                                                    <button class="btn btn-outline-secondary copy-to-clipboard" data-clipboard-text="{{ withdrawal.wallet_address }}">
+                                                                        <i class="fas fa-copy"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li class="list-group-item bg-dark d-flex justify-content-between">
+                                                            <span>Status</span>
+                                                            <strong>
+                                                                {% if withdrawal.status == 'pending' %}
+                                                                <span class="badge bg-warning">Pending</span>
+                                                                {% elif withdrawal.status == 'approved' %}
+                                                                <span class="badge bg-success">Approved</span>
+                                                                {% elif withdrawal.status == 'rejected' %}
+                                                                <span class="badge bg-danger">Rejected</span>
+                                                                {% endif %}
+                                                            </strong>
+                                                        </li>
+                                                        <li class="list-group-item bg-dark d-flex justify-content-between">
+                                                            <span>Created At</span>
+                                                            <strong>{{ withdrawal.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</strong>
+                                                        </li>
+                                                        {% if withdrawal.processed_at %}
+                                                        <li class="list-group-item bg-dark d-flex justify-content-between">
+                                                            <span>Processed At</span>
+                                                            <strong>{{ withdrawal.processed_at.strftime('%Y-%m-%d %H:%M:%S') }}</strong>
+                                                        </li>
+                                                        {% endif %}
+                                                        {% if withdrawal.transaction_id %}
+                                                        <li class="list-group-item bg-dark d-flex justify-content-between">
+                                                            <span>Transaction ID</span>
+                                                            <strong>{{ withdrawal.transaction_id }}</strong>
+                                                        </li>
+                                                        {% endif %}
+                                                    </ul>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    {% if withdrawal.status == 'pending' %}
+                                                    <form action="{{ url_for('admin.approve_withdrawal', withdrawal_id=withdrawal.id) }}" method="post" class="d-inline">
+                                                        <button type="submit" class="btn btn-success" data-confirm="Are you sure you want to approve this withdrawal?">
+                                                            <i class="fas fa-check me-1"></i> Approve
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ url_for('admin.reject_withdrawal', withdrawal_id=withdrawal.id) }}" method="post" class="d-inline">
+                                                        <button type="submit" class="btn btn-danger" data-confirm="Are you sure you want to reject this withdrawal?">
+                                                            <i class="fas fa-times me-1"></i> Reject
+                                                        </button>
+                                                    </form>
+                                                    {% endif %}
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-money-bill-wave fa-4x text-muted mb-3"></i>
+                    <h4>No withdrawals found</h4>
+                    <p class="text-muted">
+                        {% if current_filter != 'all' %}
+                        There are no {{ current_filter }} withdrawals at the moment.
+                        {% else %}
+                        There are no withdrawals in the system yet.
+                        {% endif %}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card bg-dark border-0 shadow">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Withdrawal Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group bg-dark">
+                            <li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                                <span>Total Withdrawals</span>
+                                <span class="badge bg-primary rounded-pill">{{ withdrawals|length }}</span>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                                <span>Pending Withdrawals</span>
+                                <span class="badge bg-warning rounded-pill">{{ withdrawals|selectattr('status', 'equalto', 'pending')|list|length }}</span>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                                <span>Approved Withdrawals</span>
+                                <span class="badge bg-success rounded-pill">{{ withdrawals|selectattr('status', 'equalto', 'approved')|list|length }}</span>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                                <span>Rejected Withdrawals</span>
+                                <span class="badge bg-danger rounded-pill">{{ withdrawals|selectattr('status', 'equalto', 'rejected')|list|length }}</span>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                                <span>Total Amount</span>
+                                <span class="badge bg-info rounded-pill">${{ withdrawals|sum(attribute='amount')|round(2) }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card bg-dark border-0 shadow">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Processing Guidelines</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle me-2"></i>Withdrawal Verification</h5>
+                            <p>Always verify the user's balance and wallet address before processing withdrawals. Double-check the cryptocurrency network to avoid sending funds to the wrong network.</p>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>Processing Time</h5>
+                            <p>Process withdrawals within 24-48 hours. Large withdrawals (over $1,000) may require additional verification and approval from senior management.</p>
+                        </div>
+                        
+                        <div class="alert alert-danger">
+                            <h5><i class="fas fa-shield-alt me-2"></i>Security Measures</h5>
+                            <p>Be alert for unusual withdrawal patterns or multiple withdrawal requests from the same user in a short period. These could indicate suspicious activity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

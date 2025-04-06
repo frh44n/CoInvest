@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Admin: Edit User{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="mb-4">
+            <a href="{{ url_for('admin.view_user', user_id=user_to_edit.id) }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Back to User Profile
+            </a>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent">
+                <h3 class="mb-0">Edit User: {{ user_to_edit.username }}</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('admin.edit_user', user_id=user_to_edit.id) }}" method="post" class="needs-validation" novalidate>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h4 class="mb-3">Basic Information</h4>
+                            
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" value="{{ user_to_edit.username }}" required>
+                                <div class="invalid-feedback">Username is required.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ user_to_edit.email }}" required>
+                                <div class="invalid-feedback">Valid email is required.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="mobile" class="form-label">Mobile</label>
+                                <input type="text" class="form-control" id="mobile" name="mobile" value="{{ user_to_edit.mobile }}" required>
+                                <div class="invalid-feedback">Mobile number is required.</div>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" {{ user_to_edit.is_admin ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_admin">Admin User</label>
+                                <small class="form-text text-warning d-block">Warning: Admin users have full access to the admin dashboard.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h4 class="mb-3">Financial Information</h4>
+                            
+                            <div class="mb-3">
+                                <label for="wallet_balance" class="form-label">Wallet Balance ($)</label>
+                                <input type="number" class="form-control" id="wallet_balance" name="wallet_balance" value="{{ user_to_edit.wallet_balance }}" step="0.01" min="0" required>
+                                <div class="invalid-feedback">Valid balance is required.</div>
+                                <small class="form-text text-warning">Warning: Changing this value will modify the user's available balance.</small>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-info-circle me-2"></i>User Information</h5>
+                                <ul class="mb-0">
+                                    <li>User ID: {{ user_to_edit.id }}</li>
+                                    <li>Referral Code: {{ user_to_edit.referral_code }}</li>
+                                    <li>Joined: {{ user_to_edit.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+                                    <li>Team Size: {{ user_to_edit.get_team_count() }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.view_user', user_id=user_to_edit.id) }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

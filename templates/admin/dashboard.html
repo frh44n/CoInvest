@@ -1,0 +1,173 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Admin Dashboard</h2>
+            <a href="{{ url_for('user.home') }}" class="btn btn-outline-light">
+                <i class="fas fa-user me-1"></i> Back to User Portal
+            </a>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary border-0 shadow admin-stat-card">
+                    <div class="card-body">
+                        <div class="stat-value">{{ user_count }}</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success border-0 shadow admin-stat-card">
+                    <div class="card-body">
+                        <div class="stat-value">${{ total_deposits|round(2) }}</div>
+                        <div class="stat-label">Total Deposits</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger border-0 shadow admin-stat-card">
+                    <div class="card-body">
+                        <div class="stat-value">${{ total_withdrawals|round(2) }}</div>
+                        <div class="stat-label">Total Withdrawals</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info border-0 shadow admin-stat-card">
+                    <div class="card-body">
+                        <div class="stat-value">${{ total_investments|round(2) }}</div>
+                        <div class="stat-label">Total Investments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Actions -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow h-100">
+                    <div class="card-header bg-transparent border-bottom-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Pending Deposits</h5>
+                        <a href="{{ url_for('admin.deposits', status='pending') }}" class="btn btn-sm btn-outline-light">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if pending_deposits > 0 %}
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-exclamation-circle fa-3x text-warning"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">{{ pending_deposits }}</h3>
+                                <p class="mb-0">deposits need review</p>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ url_for('admin.deposits', status='pending') }}" class="btn btn-warning">
+                                    <i class="fas fa-tasks me-1"></i> Process Now
+                                </a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                            <h5>No pending deposits</h5>
+                            <p class="text-muted mb-0">All deposits have been processed.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow h-100">
+                    <div class="card-header bg-transparent border-bottom-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Pending Withdrawals</h5>
+                        <a href="{{ url_for('admin.withdrawals', status='pending') }}" class="btn btn-sm btn-outline-light">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if pending_withdrawals > 0 %}
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-exclamation-circle fa-3x text-warning"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">{{ pending_withdrawals }}</h3>
+                                <p class="mb-0">withdrawals waiting approval</p>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ url_for('admin.withdrawals', status='pending') }}" class="btn btn-warning">
+                                    <i class="fas fa-tasks me-1"></i> Process Now
+                                </a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                            <h5>No pending withdrawals</h5>
+                            <p class="text-muted mb-0">All withdrawals have been processed.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts and Analytics -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Investment Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="investments-chart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary w-100 h-100 py-3">
+                                    <i class="fas fa-users fa-2x mb-2"></i>
+                                    <div>Manage Users</div>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ url_for('admin.plans') }}" class="btn btn-outline-success w-100 h-100 py-3">
+                                    <i class="fas fa-project-diagram fa-2x mb-2"></i>
+                                    <div>Manage Plans</div>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ url_for('admin.deposits') }}" class="btn btn-outline-info w-100 h-100 py-3">
+                                    <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                                    <div>Manage Deposits</div>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ url_for('admin.withdrawals') }}" class="btn btn-outline-danger w-100 h-100 py-3">
+                                    <i class="fas fa-hand-holding-usd fa-2x mb-2"></i>
+                                    <div>Manage Withdrawals</div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

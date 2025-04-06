@@ -1,0 +1,418 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    {% if user %}
+    <!-- Logged in home (Dashboard) -->
+    <div class="col-12">
+        <h2 class="mb-4">Welcome, {{ user.username }}!</h2>
+        
+        <!-- Home Slider -->
+        <div id="homeSlider" class="carousel slide home-slider mb-4" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#homeSlider" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#homeSlider" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#homeSlider" data-bs-slide-to="2"></button>
+            </div>
+            <div class="carousel-inner rounded">
+                <div class="carousel-item active">
+                    <div class="slider-item bg-primary">
+                        <div class="container text-center">
+                            <h3>New Investment Plans</h3>
+                            <p>Check out our latest high-return investment opportunities</p>
+                            <a href="{{ url_for('user.buy') }}" class="btn btn-light">View Plans</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="slider-item bg-info">
+                        <div class="container text-center">
+                            <h3>Refer & Earn</h3>
+                            <p>Invite friends and earn 5% commission on their investments</p>
+                            <a href="{{ url_for('user.team') }}" class="btn btn-light">My Team</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="slider-item bg-success">
+                        <div class="container text-center">
+                            <h3>Daily Rewards</h3>
+                            <p>Don't forget to claim your daily login bonus</p>
+                            {% if can_claim_reward %}
+                            <form action="{{ url_for('user.claim_reward') }}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-light">Claim Now</button>
+                            </form>
+                            {% else %}
+                            <button class="btn btn-light" disabled>Already Claimed</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#homeSlider" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#homeSlider" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        
+        <!-- Wallet Summary -->
+        <div class="card mb-4 bg-dark border-0 shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4>Wallet Balance</h4>
+                        <h2 class="text-primary">${{ user.wallet_balance|round(2) }}</h2>
+                        <div class="mt-3">
+                            <a href="{{ url_for('user.deposit') }}" class="btn btn-success me-2">
+                                <i class="fas fa-plus-circle"></i> Deposit
+                            </a>
+                            <a href="{{ url_for('user.withdraw') }}" class="btn btn-outline-light">
+                                <i class="fas fa-minus-circle"></i> Withdraw
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="p-3 rounded bg-dark border">
+                                    <h6 class="text-muted mb-1">Team Size</h6>
+                                    <h5>{{ user.get_team_count() }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 rounded bg-dark border">
+                                    <h6 class="text-muted mb-1">Investments</h6>
+                                    <h5>{{ active_investments|length }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Investments -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card bg-dark border-0 shadow">
+                    <div class="card-header bg-transparent border-bottom-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Active Investments</h5>
+                        <a href="{{ url_for('user.buy') }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus-circle"></i> New Investment
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if active_investments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Plan</th>
+                                        <th>Amount</th>
+                                        <th>Daily Return</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for investment in active_investments %}
+                                    <tr>
+                                        <td>{{ investment.plan.name }}</td>
+                                        <td>${{ investment.amount|round(2) }}</td>
+                                        <td>${{ (investment.amount * investment.plan.daily_return_percentage / 100)|round(2) }}</td>
+                                        <td>{{ investment.start_date.strftime('%Y-%m-%d') }}</td>
+                                        <td>{{ investment.end_date.strftime('%Y-%m-%d') }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                            <h5>No active investments</h5>
+                            <p class="text-muted">Start growing your money today by investing in one of our plans.</p>
+                            <a href="{{ url_for('user.buy') }}" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-1"></i> View Investment Plans
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Transactions -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card bg-dark border-0 shadow">
+                    <div class="card-header bg-transparent border-bottom-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Transactions</h5>
+                        <a href="{{ url_for('user.wallet') }}" class="btn btn-sm btn-outline-light">
+                            <i class="fas fa-history"></i> View All
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_transactions %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in recent_transactions %}
+                                    <tr>
+                                        <td>{{ transaction.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if transaction.transaction_type == 'deposit' %}
+                                            <span class="badge bg-success">Deposit</span>
+                                            {% elif transaction.transaction_type == 'withdrawal' %}
+                                            <span class="badge bg-danger">Withdrawal</span>
+                                            {% elif transaction.transaction_type == 'investment' %}
+                                            <span class="badge bg-primary">Investment</span>
+                                            {% elif transaction.transaction_type == 'investment_return' %}
+                                            <span class="badge bg-info">Return</span>
+                                            {% elif transaction.transaction_type == 'referral' %}
+                                            <span class="badge bg-warning">Referral</span>
+                                            {% elif transaction.transaction_type == 'reward' %}
+                                            <span class="badge bg-secondary">Reward</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">{{ transaction.transaction_type|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if transaction.transaction_type in ['deposit', 'investment_return', 'referral', 'reward', 'refund'] %}
+                                            <span class="text-success">+${{ transaction.amount|round(2) }}</span>
+                                            {% else %}
+                                            <span class="text-danger">-${{ transaction.amount|round(2) }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ transaction.description }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-exchange-alt fa-3x text-muted mb-3"></i>
+                            <h5>No recent transactions</h5>
+                            <p class="text-muted">Your transaction history will appear here.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Public home page (Landing page) -->
+    <div class="col-12">
+        <!-- Hero section -->
+        <div class="py-5 text-center">
+            <h1 class="display-4 fw-bold mb-4">Grow Your Wealth with Smart Investments</h1>
+            <p class="lead mb-4">
+                Join our investment platform to access high-yield investment plans with daily returns and a powerful referral program.
+            </p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 me-sm-3">
+                    <i class="fas fa-user-plus me-1"></i> Sign Up Now
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">
+                    <i class="fas fa-sign-in-alt me-1"></i> Login
+                </a>
+            </div>
+        </div>
+        
+        <!-- Features -->
+        <div class="row g-4 py-4">
+            <div class="col-md-4">
+                <div class="card h-100 bg-dark border-0 shadow dashboard-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="card-title">Daily Returns</h3>
+                        <p class="card-text">Earn daily interest on your investments with our carefully selected investment plans.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 bg-dark border-0 shadow dashboard-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-users fa-3x text-info"></i>
+                        </div>
+                        <h3 class="card-title">Referral Program</h3>
+                        <p class="card-text">Invite friends and earn up to 5% commission on their investment amounts.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 bg-dark border-0 shadow dashboard-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-shield-alt fa-3x text-success"></i>
+                        </div>
+                        <h3 class="card-title">Secure Platform</h3>
+                        <p class="card-text">Your investments are safe with our secure and transparent investment platform.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Investment Plans Preview -->
+        <div class="text-center py-5">
+            <h2 class="mb-4">Investment Plans</h2>
+            <p class="lead mb-5">Choose from our range of investment plans designed to match your financial goals.</p>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 bg-dark border-0 shadow plan-card">
+                        <div class="card-body p-4 text-center">
+                            <h3 class="card-title">Starter</h3>
+                            <div class="display-6 my-3">$100</div>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">1.5% Daily Return</li>
+                                <li class="mb-2">30 Days Duration</li>
+                                <li class="mb-2">Total Return: 145%</li>
+                            </ul>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary mt-3 w-100">Start Investing</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 bg-primary border-0 shadow plan-card">
+                        <div class="card-body p-4 text-center">
+                            <h3 class="card-title">Premium</h3>
+                            <div class="display-6 my-3">$500</div>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">2% Daily Return</li>
+                                <li class="mb-2">45 Days Duration</li>
+                                <li class="mb-2">Total Return: 190%</li>
+                            </ul>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-light mt-3 w-100">Start Investing</a>
+                        </div>
+                        <span class="badge bg-warning position-absolute top-0 end-0 mt-3 me-3">POPULAR</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 bg-dark border-0 shadow plan-card">
+                        <div class="card-body p-4 text-center">
+                            <h3 class="card-title">Professional</h3>
+                            <div class="display-6 my-3">$1000</div>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">2.5% Daily Return</li>
+                                <li class="mb-2">60 Days Duration</li>
+                                <li class="mb-2">Total Return: 250%</li>
+                            </ul>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary mt-3 w-100">Start Investing</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Testimonials -->
+        <div class="text-center py-5">
+            <h2 class="mb-4">What Our Investors Say</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 bg-dark border-0 shadow">
+                        <div class="card-body p-4">
+                            <div class="mb-3 text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="card-text">"I've been using this platform for 6 months and my investments have grown steadily. The daily returns are always on time!"</p>
+                            <div class="d-flex justify-content-center align-items-center mt-3">
+                                <div class="bg-primary rounded-circle text-center d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <span>JD</span>
+                                </div>
+                                <div class="ms-3 text-start">
+                                    <h6 class="mb-0">John Doe</h6>
+                                    <small class="text-muted">Investor since 2022</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 bg-dark border-0 shadow">
+                        <div class="card-body p-4">
+                            <div class="mb-3 text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="card-text">"The referral program is amazing! I've earned over $500 just by inviting my friends to join the platform."</p>
+                            <div class="d-flex justify-content-center align-items-center mt-3">
+                                <div class="bg-info rounded-circle text-center d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <span>JS</span>
+                                </div>
+                                <div class="ms-3 text-start">
+                                    <h6 class="mb-0">Jane Smith</h6>
+                                    <small class="text-muted">Investor since 2023</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 bg-dark border-0 shadow">
+                        <div class="card-body p-4">
+                            <div class="mb-3 text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <p class="card-text">"I started with the Starter plan and quickly upgraded to Premium after seeing the consistent returns. Highly recommended!"</p>
+                            <div class="d-flex justify-content-center align-items-center mt-3">
+                                <div class="bg-success rounded-circle text-center d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <span>RJ</span>
+                                </div>
+                                <div class="ms-3 text-start">
+                                    <h6 class="mb-0">Robert Johnson</h6>
+                                    <small class="text-muted">Investor since 2022</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Call to Action -->
+        <div class="text-center py-5 mb-3">
+            <div class="card bg-primary border-0 shadow">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-3">Ready to Start Investing?</h2>
+                    <p class="card-text lead mb-4">Create your account now and start earning daily returns on your investments.</p>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4">
+                        <i class="fas fa-rocket me-2"></i>Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

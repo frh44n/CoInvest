@@ -1,0 +1,160 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Deposit Funds{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="mb-4">
+            <a href="{{ url_for('user.wallet') }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Back to Wallet
+            </a>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent">
+                <h3 class="mb-0">Deposit Funds</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('user.deposit') }}" method="post" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <label for="amount" class="form-label">Amount to Deposit ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                            <input type="number" class="form-control" id="amount" name="amount" placeholder="Enter amount" min="10" step="1" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid amount (minimum $10).
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Select Payment Method</label>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-check payment-method">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="bitcoin" value="bitcoin" required checked>
+                                    <label class="form-check-label d-flex align-items-center" for="bitcoin">
+                                        <i class="fab fa-bitcoin fa-lg text-warning me-2"></i> Bitcoin
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check payment-method">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="ethereum" value="ethereum" required>
+                                    <label class="form-check-label d-flex align-items-center" for="ethereum">
+                                        <i class="fab fa-ethereum fa-lg text-info me-2"></i> Ethereum
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check payment-method">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="usdt" value="usdt" required>
+                                    <label class="form-check-label d-flex align-items-center" for="usdt">
+                                        <i class="fas fa-dollar-sign fa-lg text-success me-2"></i> USDT
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <div class="d-flex">
+                            <div class="me-2">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">After submitting, you will receive payment instructions with wallet address and QR code.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-arrow-right me-2"></i>Continue to Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow mt-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Deposit Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="depositInfo">
+                    <div class="accordion-item bg-dark">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                Minimum Deposit Amount
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#depositInfo">
+                            <div class="accordion-body">
+                                The minimum deposit amount is $10. There is no maximum limit for deposits.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-dark">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Processing Time
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#depositInfo">
+                            <div class="accordion-body">
+                                Cryptocurrency deposits are typically processed within 1-3 hours after receiving the required confirmations on the blockchain. Please be patient as processing times may vary.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-dark">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Proof of Payment
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#depositInfo">
+                            <div class="accordion-body">
+                                After making your payment, you'll need to provide the transaction ID or hash. This helps us verify your payment quickly and accurately.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-method {
+        padding: 15px;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-method:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .form-check-input:checked ~ .form-check-label {
+        font-weight: bold;
+    }
+    
+    .form-check-input:checked + .form-check-label .fa-bitcoin,
+    .form-check-input:checked + .form-check-label .fab-bitcoin {
+        color: #f7931a !important;
+    }
+    
+    .form-check-input:checked + .form-check-label .fa-ethereum,
+    .form-check-input:checked + .form-check-label .fab-ethereum {
+        color: #627eea !important;
+    }
+    
+    .form-check-input:checked + .form-check-label .fa-dollar-sign {
+        color: #26a17b !important;
+    }
+</style>
+{% endblock %}

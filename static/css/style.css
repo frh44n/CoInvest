@@ -1,0 +1,179 @@
+/* Custom styles for investment portal */
+
+/* General styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Dashboard card styles */
+.dashboard-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Investment plan card styles */
+.plan-card {
+    border-radius: 10px;
+    border: 1px solid var(--bs-border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.plan-card .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* Home slider styles */
+.home-slider {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.slider-item {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Bottom navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.bottom-nav .nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 0.8rem;
+}
+
+.bottom-nav .nav-link i {
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+}
+
+/* Login and registration form */
+.auth-form-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.auth-form {
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Team page styles */
+.referral-box {
+    background: var(--bs-dark);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.team-member-card {
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+/* Wallet page */
+.wallet-balance-card {
+    border-radius: 15px;
+    padding: 20px;
+    background: linear-gradient(45deg, var(--bs-primary), var(--bs-info));
+    color: white;
+    margin-bottom: 20px;
+}
+
+.transaction-item {
+    border-left: 3px solid transparent;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.transaction-item:hover {
+    background-color: var(--bs-dark);
+}
+
+.transaction-item.deposit {
+    border-left-color: var(--bs-success);
+}
+
+.transaction-item.withdrawal {
+    border-left-color: var(--bs-danger);
+}
+
+.transaction-item.investment {
+    border-left-color: var(--bs-primary);
+}
+
+.transaction-item.reward {
+    border-left-color: var(--bs-warning);
+}
+
+.transaction-item.referral {
+    border-left-color: var(--bs-info);
+}
+
+/* Admin dashboard */
+.admin-stat-card {
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.admin-stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.admin-stat-card .stat-label {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+/* Responsive padding adjustment for bottom nav */
+@media (max-width: 767.98px) {
+    main {
+        padding-bottom: 70px;
+    }
+}

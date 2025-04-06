@@ -1,0 +1,132 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Buy Plan{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="mb-4">
+            <a href="{{ url_for('user.buy') }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Back to Plans
+            </a>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow mb-4">
+            <div class="card-header bg-transparent">
+                <h3 class="mb-0">Confirm Investment</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-dark border border-primary h-100">
+                            <div class="card-body text-center p-4">
+                                <h4 class="mb-3">{{ plan.name }}</h4>
+                                <div class="display-5 my-3">${{ plan.price|round(2) }}</div>
+                                <div class="mb-3">
+                                    <span class="badge bg-primary">{{ plan.daily_return_percentage }}% Daily</span>
+                                    <span class="badge bg-info">{{ plan.duration_days }} Days</span>
+                                </div>
+                                <p class="mb-0">{{ plan.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Investment Summary</h5>
+                        <ul class="list-group bg-dark mb-4">
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Investment Amount</span>
+                                <strong>${{ plan.price|round(2) }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Daily Return ({{ plan.daily_return_percentage }}%)</span>
+                                <strong>${{ (plan.price * plan.daily_return_percentage / 100)|round(2) }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Duration</span>
+                                <strong>{{ plan.duration_days }} days</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Total Return</span>
+                                <strong>${{ (plan.price * plan.daily_return_percentage / 100 * plan.duration_days)|round(2) }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Net Profit</span>
+                                <strong class="text-success">${{ (plan.price * plan.daily_return_percentage / 100 * plan.duration_days - plan.price)|round(2) }}</strong>
+                            </li>
+                        </ul>
+                        
+                        <div class="alert {{ user.wallet_balance >= plan.price ? 'alert-info' : 'alert-danger' }}">
+                            <div class="d-flex">
+                                <div class="me-2">
+                                    <i class="fas {{ user.wallet_balance >= plan.price ? 'fa-info-circle' : 'fa-exclamation-triangle' }}"></i>
+                                </div>
+                                <div>
+                                    {% if user.wallet_balance >= plan.price %}
+                                    <p class="mb-0">You have sufficient balance to purchase this plan.</p>
+                                    {% else %}
+                                    <p class="mb-0">You don't have enough balance. Please deposit funds to continue.</p>
+                                    <div class="mt-2">
+                                        <a href="{{ url_for('user.deposit') }}" class="btn btn-sm btn-success">
+                                            <i class="fas fa-plus-circle me-1"></i> Deposit Funds
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form id="purchase-plan-form" action="{{ url_for('user.buy_plan', plan_id=plan.id) }}" method="post">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary {{ user.wallet_balance < plan.price ? 'disabled' : '' }}" {{ user.wallet_balance < plan.price ? 'disabled' : '' }}>
+                                    <i class="fas fa-check-circle me-2"></i>Confirm Investment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">What happens next?</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-shopping-cart fa-3x text-primary"></i>
+                            </div>
+                            <h5>1. Purchase Plan</h5>
+                            <p class="small text-muted">Confirm your investment by clicking the button above.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-line fa-3x text-info"></i>
+                            </div>
+                            <h5>2. Daily Returns</h5>
+                            <p class="small text-muted">Receive daily returns directly to your wallet.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-coins fa-3x text-success"></i>
+                            </div>
+                            <h5>3. Completion</h5>
+                            <p class="small text-muted">After {{ plan.duration_days }} days, your investment period ends.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/plans.js') }}"></script>
+{% endblock %}

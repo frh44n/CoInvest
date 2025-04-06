@@ -1,0 +1,275 @@
+{% extends 'layout.html' %}
+
+{% block title %} - My Wallet{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2 class="mb-4">My Wallet</h2>
+        
+        <!-- Wallet Balance Card -->
+        <div class="wallet-balance-card mb-4 shadow">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5>Available Balance</h5>
+                    <h1>${{ user.wallet_balance|round(2) }}</h1>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <a href="{{ url_for('user.deposit') }}" class="btn btn-light me-2 mb-2 mb-md-0">
+                        <i class="fas fa-plus-circle me-1"></i> Deposit
+                    </a>
+                    <a href="{{ url_for('user.withdraw') }}" class="btn btn-outline-light">
+                        <i class="fas fa-minus-circle me-1"></i> Withdraw
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Requests -->
+        {% if pending_deposits or pending_withdrawals %}
+        <div class="card bg-dark border-0 shadow mb-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Pending Requests</h5>
+            </div>
+            <div class="card-body">
+                {% if pending_deposits %}
+                <h6 class="mb-3">Deposits</h6>
+                <div class="table-responsive mb-4">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for deposit in pending_deposits %}
+                            <tr>
+                                <td>{{ deposit.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>${{ deposit.amount|round(2) }}</td>
+                                <td>{{ deposit.payment_method|title }}</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                
+                {% if pending_withdrawals %}
+                <h6 class="mb-3">Withdrawals</h6>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Wallet Address</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for withdrawal in pending_withdrawals %}
+                            <tr>
+                                <td>{{ withdrawal.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>${{ withdrawal.amount|round(2) }}</td>
+                                <td>{{ withdrawal.wallet_address[:10] }}...</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Transaction History -->
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Transaction History</h5>
+                <div>
+                    <select id="transaction-filter" class="form-select form-select-sm">
+                        <option value="all">All Transactions</option>
+                        <option value="deposit">Deposits</option>
+                        <option value="withdrawal">Withdrawals</option>
+                        <option value="investment">Investments</option>
+                        <option value="investment_return">Returns</option>
+                        <option value="referral">Referrals</option>
+                        <option value="reward">Rewards</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if transactions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr class="transaction-item {{ transaction.transaction_type }}">
+                                <td>{{ transaction.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    {% if transaction.transaction_type == 'deposit' %}
+                                    <span class="badge bg-success">Deposit</span>
+                                    {% elif transaction.transaction_type == 'withdrawal' %}
+                                    <span class="badge bg-danger">Withdrawal</span>
+                                    {% elif transaction.transaction_type == 'investment' %}
+                                    <span class="badge bg-primary">Investment</span>
+                                    {% elif transaction.transaction_type == 'investment_return' %}
+                                    <span class="badge bg-info">Return</span>
+                                    {% elif transaction.transaction_type == 'referral' %}
+                                    <span class="badge bg-warning">Referral</span>
+                                    {% elif transaction.transaction_type == 'reward' %}
+                                    <span class="badge bg-secondary">Reward</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ transaction.transaction_type|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if transaction.transaction_type in ['deposit', 'investment_return', 'referral', 'reward', 'refund'] %}
+                                    <span class="text-success">+${{ transaction.amount|round(2) }}</span>
+                                    {% else %}
+                                    <span class="text-danger">-${{ transaction.amount|round(2) }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ transaction.description }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-exchange-alt fa-3x text-muted mb-3"></i>
+                    <h5>No transactions yet</h5>
+                    <p class="text-muted">Your transaction history will appear here.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-dark border-0 shadow mb-4 sticky-top" style="top: 20px;">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <a href="{{ url_for('user.deposit') }}" class="btn btn-success">
+                        <i class="fas fa-plus-circle me-2"></i>Deposit Funds
+                    </a>
+                    <a href="{{ url_for('user.withdraw') }}" class="btn btn-danger">
+                        <i class="fas fa-minus-circle me-2"></i>Withdraw Funds
+                    </a>
+                    <a href="{{ url_for('user.buy') }}" class="btn btn-primary">
+                        <i class="fas fa-shopping-cart me-2"></i>Buy Investment Plan
+                    </a>
+                    <a href="{{ url_for('user.team') }}" class="btn btn-info">
+                        <i class="fas fa-users me-2"></i>View Referral Team
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow mb-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Wallet Information</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group bg-dark">
+                    <li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <span>Current Balance</span>
+                        <span class="badge bg-primary rounded-pill">${{ user.wallet_balance|round(2) }}</span>
+                    </li>
+                    <li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <span>Active Investments</span>
+                        <span class="badge bg-success rounded-pill">{{ user.get_active_investments()|length }}</span>
+                    </li>
+                    <li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <span>Referral Earnings</span>
+                        <span class="badge bg-info rounded-pill">
+                            ${{ transactions|selectattr('transaction_type', 'equalto', 'referral')|sum(attribute='amount')|round(2) }}
+                        </span>
+                    </li>
+                    <li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <span>Daily Rewards</span>
+                        <span class="badge bg-warning rounded-pill">
+                            ${{ transactions|selectattr('transaction_type', 'equalto', 'reward')|sum(attribute='amount')|round(2) }}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Payment Methods</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-column gap-2">
+                    <div class="p-3 rounded bg-dark border">
+                        <div class="d-flex align-items-center">
+                            <i class="fab fa-bitcoin fa-2x text-warning me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Bitcoin (BTC)</h6>
+                                <small class="text-muted">Deposit & Withdraw</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 rounded bg-dark border">
+                        <div class="d-flex align-items-center">
+                            <i class="fab fa-ethereum fa-2x text-info me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Ethereum (ETH)</h6>
+                                <small class="text-muted">Deposit & Withdraw</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 rounded bg-dark border">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-dollar-sign fa-2x text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-0">USDT (TRC20)</h6>
+                                <small class="text-muted">Deposit & Withdraw</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const transactionFilter = document.getElementById('transaction-filter');
+        const transactionItems = document.querySelectorAll('.transaction-item');
+        
+        if (transactionFilter) {
+            transactionFilter.addEventListener('change', function() {
+                const filterValue = this.value;
+                
+                transactionItems.forEach(item => {
+                    if (filterValue === 'all' || item.classList.contains(filterValue)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

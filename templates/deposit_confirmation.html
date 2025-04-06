@@ -1,0 +1,116 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Deposit Confirmation{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="mb-4">
+            <a href="{{ url_for('user.wallet') }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Back to Wallet
+            </a>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent">
+                <h3 class="mb-0">Deposit Confirmation</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Your deposit request has been created successfully. Please complete the payment to continue.
+                </div>
+                
+                <div class="text-center my-4">
+                    <h4>Amount to Send</h4>
+                    <div class="display-6 mb-2">${{ deposit.amount|round(2) }}</div>
+                    <span class="badge bg-info">{{ deposit.payment_method|title }}</span>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-body bg-dark">
+                        <h5 class="card-title">Payment Instructions</h5>
+                        
+                        <!-- Wallet Address -->
+                        <div class="mb-3">
+                            <label class="form-label">Send to this {{ deposit.payment_method|title }} address:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="DEMO_WALLET_ADDRESS_FOR_{{ deposit.payment_method|upper }}" readonly>
+                                <button class="btn btn-outline-light copy-to-clipboard" data-clipboard-text="DEMO_WALLET_ADDRESS_FOR_{{ deposit.payment_method|upper }}">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- QR Code if available -->
+                        {% if qr_data %}
+                        <div class="text-center mb-3">
+                            <p><button class="btn btn-sm btn-outline-light toggle-qr-code" data-target="qr-code">Show QR Code</button></p>
+                            <div id="qr-code" class="d-none">
+                                <img src="{{ qr_data }}" alt="Payment QR Code" class="img-fluid" style="max-width: 200px;">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Payment Method Specific Instructions -->
+                        {% if deposit.payment_method == 'bitcoin' %}
+                        <div class="alert alert-warning">
+                            <strong>Important:</strong> Please send only Bitcoin (BTC) to this address. Sending any other cryptocurrency may result in permanent loss.
+                        </div>
+                        {% elif deposit.payment_method == 'ethereum' %}
+                        <div class="alert alert-warning">
+                            <strong>Important:</strong> Please send only Ethereum (ETH) to this address. Sending any other cryptocurrency may result in permanent loss.
+                        </div>
+                        {% elif deposit.payment_method == 'usdt' %}
+                        <div class="alert alert-warning">
+                            <strong>Important:</strong> Please send USDT using the TRC20 network only. Other networks are not supported.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-body bg-dark">
+                        <h5 class="card-title">After Payment</h5>
+                        <p>Please provide the transaction ID/hash after completing your payment:</p>
+                        
+                        <form action="#" method="post" class="needs-validation" novalidate>
+                            <input type="hidden" name="deposit_id" value="{{ deposit.id }}">
+                            
+                            <div class="mb-3">
+                                <label for="transaction_id" class="form-label">Transaction ID/Hash</label>
+                                <input type="text" class="form-control" id="transaction_id" name="transaction_id" placeholder="Enter your transaction ID/hash" required>
+                                <div class="invalid-feedback">
+                                    Please provide the transaction ID/hash.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="proof_of_payment" class="form-label">Proof of Payment (Optional)</label>
+                                <textarea class="form-control" id="proof_of_payment" name="proof_of_payment" rows="3" placeholder="Any additional information about your payment"></textarea>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Submit Payment Confirmation
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <div class="d-flex">
+                        <div class="me-2">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Your deposit will be credited to your account after we verify the payment. This typically takes 1-3 hours after receiving blockchain confirmations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

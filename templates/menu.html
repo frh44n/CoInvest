@@ -1,0 +1,199 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Menu{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 col-lg-3">
+        <div class="card bg-dark border-0 shadow mb-4">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <div class="display-1">
+                        <i class="fas fa-user-circle text-primary"></i>
+                    </div>
+                </div>
+                <h4>{{ user.username }}</h4>
+                <p class="text-muted mb-3">Member since {{ user.created_at.strftime('%b %Y') }}</p>
+                
+                <div class="mb-3">
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </a>
+                </div>
+                
+                {% if user.is_admin %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-shield-alt me-2"></i> You have admin privileges
+                    <div class="mt-2">
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-primary w-100">
+                            Admin Dashboard
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8 col-lg-9">
+        <h2 class="mb-4">Menu</h2>
+        
+        <div class="row g-4">
+            <!-- Wallet -->
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow h-100 dashboard-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="fas fa-wallet fa-2x text-success"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">My Wallet</h4>
+                                <p class="text-muted mb-0">Manage your funds</p>
+                            </div>
+                        </div>
+                        <p>Current Balance: <strong>${{ user.wallet_balance|round(2) }}</strong></p>
+                        <div class="d-flex">
+                            <a href="{{ url_for('user.wallet') }}" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-eye me-1"></i> View
+                            </a>
+                            <a href="{{ url_for('user.deposit') }}" class="btn btn-success me-2">
+                                <i class="fas fa-plus me-1"></i> Deposit
+                            </a>
+                            <a href="{{ url_for('user.withdraw') }}" class="btn btn-outline-light">
+                                <i class="fas fa-minus me-1"></i> Withdraw
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team -->
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow h-100 dashboard-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="fas fa-users fa-2x text-info"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">My Team</h4>
+                                <p class="text-muted mb-0">Referral program</p>
+                            </div>
+                        </div>
+                        <p>Team Members: <strong>{{ user.get_team_count() }}</strong></p>
+                        <div>
+                            <a href="{{ url_for('user.team') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-user-friends me-1"></i> View Team
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Investments -->
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow h-100 dashboard-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="fas fa-chart-line fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">Investments</h4>
+                                <p class="text-muted mb-0">Grow your money</p>
+                            </div>
+                        </div>
+                        <p>Active Plans: <strong>{{ user.get_active_investments()|length }}</strong></p>
+                        <div>
+                            <a href="{{ url_for('user.buy') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-shopping-cart me-1"></i> Investment Plans
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Daily Rewards -->
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow h-100 dashboard-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="fas fa-gift fa-2x text-warning"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">Daily Rewards</h4>
+                                <p class="text-muted mb-0">Claim your bonus</p>
+                            </div>
+                        </div>
+                        <p>Status: 
+                            {% if user.can_claim_daily_reward() %}
+                            <span class="badge bg-success">Available</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Claimed</span>
+                            <small class="text-muted ms-1">Check back tomorrow</small>
+                            {% endif %}
+                        </p>
+                        <div>
+                            <form action="{{ url_for('user.claim_reward') }}" method="post">
+                                <button type="submit" class="btn btn-outline-warning" {{ not user.can_claim_daily_reward() ? 'disabled' : '' }}>
+                                    <i class="fas fa-gift me-1"></i> Claim Reward
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account Settings -->
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow h-100 dashboard-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="fas fa-cog fa-2x text-secondary"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">Account Settings</h4>
+                                <p class="text-muted mb-0">Manage your profile</p>
+                            </div>
+                        </div>
+                        <p>Email: <strong>{{ user.email }}</strong></p>
+                        <div>
+                            <button class="btn btn-outline-secondary" disabled>
+                                <i class="fas fa-user-cog me-1"></i> Edit Profile
+                                <small class="ms-1">(Coming Soon)</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Support -->
+            <div class="col-md-6">
+                <div class="card bg-dark border-0 shadow h-100 dashboard-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="fas fa-headset fa-2x text-danger"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">Support</h4>
+                                <p class="text-muted mb-0">Get help</p>
+                            </div>
+                        </div>
+                        <p>Have questions? Contact our support team.</p>
+                        <div>
+                            <button class="btn btn-outline-danger" disabled>
+                                <i class="fas fa-ticket-alt me-1"></i> Contact Support
+                                <small class="ms-1">(Coming Soon)</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

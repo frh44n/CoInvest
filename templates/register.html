@@ -1,0 +1,120 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="auth-form-container">
+            <div class="text-center mb-4">
+                <h2>Create an Account</h2>
+                <p class="text-muted">Join our investment platform and start earning</p>
+            </div>
+            
+            <div class="card auth-form bg-dark border-0 shadow">
+                <div class="card-body p-4">
+                    <form id="registration-form" method="post" action="{{ url_for('auth.register') }}" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Your email address" required>
+                                <div class="invalid-feedback" id="email-feedback">
+                                    Please enter a valid email address.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="mobile" class="form-label">Mobile Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>
+                                <input type="tel" class="form-control" id="mobile" name="mobile" placeholder="Your mobile number" required>
+                                <div class="invalid-feedback" id="mobile-feedback">
+                                    Please enter a valid mobile number.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required>
+                                <div class="invalid-feedback" id="username-feedback">
+                                    Please choose a valid username (minimum 3 characters).
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Create a password" required>
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <div class="invalid-feedback" id="password-feedback">
+                                    Password must be at least 8 characters.
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-danger" id="password-strength" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div class="mt-1 small text-muted text-end">Password strength</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+                                <div class="invalid-feedback" id="confirm-password-feedback">
+                                    Passwords do not match.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="invitation_code" class="form-label">Invitation Code (optional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user-friends"></i></span>
+                                <input type="text" class="form-control" id="invitation_code" name="invitation_code" placeholder="Enter invitation code if you have one">
+                            </div>
+                            <small class="form-text text-muted">Enter a referral code to join someone's team.</small>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                            </label>
+                            <div class="invalid-feedback">
+                                You must agree to our terms to continue.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p>Already have an account? <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Login</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

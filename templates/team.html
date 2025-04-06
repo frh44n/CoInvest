@@ -1,0 +1,167 @@
+{% extends 'layout.html' %}
+
+{% block title %} - My Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">My Referral Team</h2>
+        
+        <!-- Referral Information -->
+        <div class="card bg-dark border-0 shadow mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Your Referral Code</h4>
+                        <div class="referral-box bg-dark border">
+                            <h3 id="referral-code" class="mb-3">{{ user.referral_code }}</h3>
+                            <button id="copy-referral-code" class="btn btn-primary">
+                                <i class="fas fa-copy me-2"></i>Copy Code
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Share Referral Link</h4>
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="referral-link" value="{{ request.host_url }}register?code={{ user.referral_code }}" readonly>
+                                <button id="copy-referral-link" class="btn btn-primary">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-outline-primary share-referral" data-platform="facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button class="btn btn-outline-primary share-referral" data-platform="twitter">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                            <button class="btn btn-outline-primary share-referral" data-platform="whatsapp">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                            <button class="btn btn-outline-primary share-referral" data-platform="telegram">
+                                <i class="fab fa-telegram-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center">
+                        <h5>Team Members</h5>
+                        <div class="display-4">{{ team_members|length }}</div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h5>Total Earnings</h5>
+                        <div class="display-4 text-success">${{ total_referral_earnings|round(2) }}</div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h5>Referral Bonus</h5>
+                        <div class="display-6">5% <span class="text-muted small">of investment</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Team Statistics -->
+        <div id="team-stats" class="mb-4">
+            <!-- This will be populated by JavaScript -->
+        </div>
+        
+        <!-- Team Members -->
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Team Members</h5>
+                <div>
+                    <select id="team-filter" class="form-select form-select-sm">
+                        <option value="all">All Members</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if team_members %}
+                <div class="row g-3">
+                    {% for member in team_members %}
+                        {% set is_active = member.get_active_investments()|length > 0 %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="team-member-card border {{ is_active ? 'border-success' : 'border-danger' }} team-member" data-status="{{ is_active ? 'active' : 'inactive' }}">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">{{ member.username }}</h5>
+                                    <span class="badge {{ is_active ? 'bg-success' : 'bg-danger' }}">
+                                        {{ is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </div>
+                                <div class="small mb-2">Joined: {{ member.created_at.strftime('%Y-%m-%d') }}</div>
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <small class="d-block text-muted">Investments</small>
+                                        <strong>{{ member.investments|length }}</strong>
+                                    </div>
+                                    <div>
+                                        <small class="d-block text-muted">Team Size</small>
+                                        <strong>{{ member.get_team_count() }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5>No team members yet</h5>
+                    <p class="text-muted">Share your referral code to start building your team.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Referral Benefits -->
+        <div class="card bg-dark border-0 shadow mt-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Referral Benefits</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-percentage fa-3x text-primary"></i>
+                            </div>
+                            <h5>5% Commission</h5>
+                            <p class="small text-muted">Earn 5% of all investments made by your direct referrals.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-infinity fa-3x text-info"></i>
+                            </div>
+                            <h5>Unlimited Referrals</h5>
+                            <p class="small text-muted">There's no limit to how many people you can refer.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-wallet fa-3x text-success"></i>
+                            </div>
+                            <h5>Instant Payments</h5>
+                            <p class="small text-muted">Referral commissions are added to your wallet instantly.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/team.js') }}"></script>
+{% endblock %}

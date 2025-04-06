@@ -1,0 +1,163 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Admin: Create Plan{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="mb-4">
+            <a href="{{ url_for('admin.plans') }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Back to Plans
+            </a>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent">
+                <h3 class="mb-0">Create New Investment Plan</h3>
+            </div>
+            <div class="card-body">
+                <form id="plan-form" action="{{ url_for('admin.create_plan') }}" method="post" class="needs-validation" novalidate>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="plan-name" class="form-label">Plan Name</label>
+                                <input type="text" class="form-control" id="plan-name" name="name" placeholder="Enter plan name" required>
+                                <div class="invalid-feedback">
+                                    Please provide a plan name.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="plan-price" class="form-label">Price ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                    <input type="number" class="form-control" id="plan-price" name="price" placeholder="Enter price" min="1" step="0.01" required>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid price (minimum $1).
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="daily-return-percentage" class="form-label">Daily Return (%)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="daily-return-percentage" name="daily_return_percentage" placeholder="Enter daily return percentage" min="0.1" step="0.1" max="10" required>
+                                    <span class="input-group-text">%</span>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid daily return percentage (0.1% - 10%).
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="duration-days" class="form-label">Duration (Days)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="duration-days" name="duration_days" placeholder="Enter duration in days" min="1" step="1" required>
+                                    <span class="input-group-text">days</span>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid duration (minimum 1 day).
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="is-active" name="is_active" checked>
+                                <label class="form-check-label" for="is-active">Active Plan</label>
+                                <small class="form-text text-muted d-block">Inactive plans will not be shown to users.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Plan Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" placeholder="Enter plan description"></textarea>
+                            </div>
+                            
+                            <div class="card bg-dark border mb-3">
+                                <div class="card-header bg-transparent">
+                                    <h5 class="mb-0">Plan Preview</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="plan-preview" class="text-center p-3">
+                                        <h3 id="preview-name">Plan Name</h3>
+                                        <div class="display-6 my-3" id="preview-price">$0.00</div>
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><span id="preview-daily-return">0.0</span>% Daily Return</li>
+                                            <li class="mb-2"><span id="preview-duration">0</span> Days Duration</li>
+                                            <li class="mb-2">Total Return: <span id="preview-total-return">0.0</span>%</li>
+                                        </ul>
+                                        <p class="text-muted small" id="preview-description">Plan description will appear here.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-info-circle me-2"></i>Plan Settings</h5>
+                                <p class="mb-0">Set competitive but sustainable rates. Plans with high daily returns should have shorter durations to manage risk.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.plans') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Create Plan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Live plan preview
+        const planName = document.getElementById('plan-name');
+        const planPrice = document.getElementById('plan-price');
+        const dailyReturn = document.getElementById('daily-return-percentage');
+        const duration = document.getElementById('duration-days');
+        const description = document.getElementById('description');
+        
+        // Preview elements
+        const previewName = document.getElementById('preview-name');
+        const previewPrice = document.getElementById('preview-price');
+        const previewDailyReturn = document.getElementById('preview-daily-return');
+        const previewDuration = document.getElementById('preview-duration');
+        const previewTotalReturn = document.getElementById('preview-total-return');
+        const previewDescription = document.getElementById('preview-description');
+        
+        // Update preview on input change
+        function updatePreview() {
+            previewName.textContent = planName.value || 'Plan Name';
+            previewPrice.textContent = planPrice.value ? '$' + parseFloat(planPrice.value).toFixed(2) : '$0.00';
+            previewDailyReturn.textContent = dailyReturn.value || '0.0';
+            previewDuration.textContent = duration.value || '0';
+            
+            // Calculate total return
+            const dailyReturnVal = parseFloat(dailyReturn.value) || 0;
+            const durationVal = parseInt(duration.value) || 0;
+            const totalReturn = (dailyReturnVal * durationVal / 100 + 1) * 100;
+            previewTotalReturn.textContent = totalReturn.toFixed(2);
+            
+            previewDescription.textContent = description.value || 'Plan description will appear here.';
+        }
+        
+        // Attach event listeners
+        planName.addEventListener('input', updatePreview);
+        planPrice.addEventListener('input', updatePreview);
+        dailyReturn.addEventListener('input', updatePreview);
+        duration.addEventListener('input', updatePreview);
+        description.addEventListener('input', updatePreview);
+        
+        // Initialize preview
+        updatePreview();
+    });
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

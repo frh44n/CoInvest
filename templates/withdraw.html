@@ -1,0 +1,179 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Withdraw Funds{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="mb-4">
+            <a href="{{ url_for('user.wallet') }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Back to Wallet
+            </a>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent">
+                <h3 class="mb-0">Withdraw Funds</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex">
+                        <div class="me-2">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Your available balance: <strong>${{ user.wallet_balance|round(2) }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form action="{{ url_for('user.withdraw') }}" method="post" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <label for="amount" class="form-label">Amount to Withdraw ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                            <input type="number" class="form-control" id="amount" name="amount" placeholder="Enter amount" min="10" step="1" max="{{ user.wallet_balance }}" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid amount (minimum $10, maximum ${{ user.wallet_balance|round(2) }}).
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Select Withdrawal Method</label>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-check payment-method">
+                                    <input class="form-check-input" type="radio" name="withdrawal_method" id="bitcoin" value="bitcoin" required checked>
+                                    <label class="form-check-label d-flex align-items-center" for="bitcoin">
+                                        <i class="fab fa-bitcoin fa-lg text-warning me-2"></i> Bitcoin
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check payment-method">
+                                    <input class="form-check-input" type="radio" name="withdrawal_method" id="ethereum" value="ethereum" required>
+                                    <label class="form-check-label d-flex align-items-center" for="ethereum">
+                                        <i class="fab fa-ethereum fa-lg text-info me-2"></i> Ethereum
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check payment-method">
+                                    <input class="form-check-input" type="radio" name="withdrawal_method" id="usdt" value="usdt" required>
+                                    <label class="form-check-label d-flex align-items-center" for="usdt">
+                                        <i class="fas fa-dollar-sign fa-lg text-success me-2"></i> USDT
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="wallet_address" class="form-label">Your Wallet Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-wallet"></i></span>
+                            <input type="text" class="form-control" id="wallet_address" name="wallet_address" placeholder="Enter your wallet address" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid wallet address.
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">Double-check your wallet address. We are not responsible for funds sent to incorrect addresses.</small>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <div class="d-flex">
+                            <div class="me-2">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">Withdrawals are typically processed within 24 hours. A $1 fee will be deducted from your withdrawal amount.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="confirm" name="confirm" required>
+                        <label class="form-check-label" for="confirm">
+                            I confirm that I have entered the correct wallet address and understand that withdrawals cannot be reversed.
+                        </label>
+                        <div class="invalid-feedback">
+                            You must confirm before proceeding.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary" {{ user.wallet_balance < 10 ? 'disabled' : '' }}>
+                            <i class="fas fa-money-bill-wave me-2"></i>Request Withdrawal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow mt-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Withdrawal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="withdrawalInfo">
+                    <div class="accordion-item bg-dark">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                Minimum Withdrawal Amount
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#withdrawalInfo">
+                            <div class="accordion-body">
+                                The minimum withdrawal amount is $10. Withdrawals below this amount cannot be processed.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-dark">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Processing Time
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#withdrawalInfo">
+                            <div class="accordion-body">
+                                Withdrawal requests are typically processed within 24 hours. However, during high volume periods, it may take up to 48 hours for your withdrawal to be approved and sent.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-dark">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Fees
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#withdrawalInfo">
+                            <div class="accordion-body">
+                                A flat fee of $1 is charged for all withdrawals. This fee is deducted from your withdrawal amount. Additional network fees may apply depending on the blockchain congestion.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-method {
+        padding: 15px;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-method:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .form-check-input:checked ~ .form-check-label {
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

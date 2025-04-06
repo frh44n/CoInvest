@@ -1,0 +1,204 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Admin: View User{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="mb-4">
+            <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Back to Users
+            </a>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow mb-4">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">User Profile: {{ user_to_view.username }}</h3>
+                <div>
+                    <a href="{{ url_for('admin.edit_user', user_id=user_to_view.id) }}" class="btn btn-primary">
+                        <i class="fas fa-edit me-1"></i> Edit User
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Basic Information</h4>
+                        <ul class="list-group bg-dark mb-4">
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>User ID</span>
+                                <strong>{{ user_to_view.id }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Username</span>
+                                <strong>{{ user_to_view.username }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Email</span>
+                                <strong>{{ user_to_view.email }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Mobile</span>
+                                <strong>{{ user_to_view.mobile }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Referral Code</span>
+                                <strong>{{ user_to_view.referral_code }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Joined</span>
+                                <strong>{{ user_to_view.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Admin Status</span>
+                                <strong>
+                                    {% if user_to_view.is_admin %}
+                                    <span class="badge bg-danger">Admin</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Regular User</span>
+                                    {% endif %}
+                                </strong>
+                            </li>
+                        </ul>
+                        
+                        <h4 class="mb-3">Financial Information</h4>
+                        <ul class="list-group bg-dark">
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Wallet Balance</span>
+                                <strong>${{ user_to_view.wallet_balance|round(2) }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Active Investments</span>
+                                <strong>{{ user_to_view.get_active_investments()|length }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Total Deposits</span>
+                                <strong>${{ user_to_view.deposits|sum(attribute='amount')|round(2) }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Total Withdrawals</span>
+                                <strong>${{ user_to_view.withdrawals|sum(attribute='amount')|round(2) }}</strong>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Team Information</h4>
+                        <ul class="list-group bg-dark mb-4">
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Team Members</span>
+                                <strong>{{ user_to_view.get_team_count() }}</strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Invited By</span>
+                                <strong>
+                                    {% if user_to_view.invited_by %}
+                                    {% set inviter = users|selectattr('id', 'equalto', user_to_view.invited_by)|first %}
+                                    <a href="{{ url_for('admin.view_user', user_id=inviter.id) }}">{{ inviter.username }}</a>
+                                    {% else %}
+                                    <span class="text-muted">None</span>
+                                    {% endif %}
+                                </strong>
+                            </li>
+                            <li class="list-group-item bg-dark d-flex justify-content-between">
+                                <span>Referral Earnings</span>
+                                <strong>${{ user_to_view.referrals|sum(attribute='bonus_amount')|round(2) }}</strong>
+                            </li>
+                        </ul>
+                        
+                        <h4 class="mb-3">Active Investments</h4>
+                        {% set active_investments = user_to_view.get_active_investments() %}
+                        {% if active_investments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Plan</th>
+                                        <th>Amount</th>
+                                        <th>Daily Return</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for investment in active_investments %}
+                                    <tr>
+                                        <td>{{ investment.plan.name }}</td>
+                                        <td>${{ investment.amount|round(2) }}</td>
+                                        <td>${{ (investment.amount * investment.plan.daily_return_percentage / 100)|round(2) }}</td>
+                                        <td>{{ investment.start_date.strftime('%Y-%m-%d') }}</td>
+                                        <td>{{ investment.end_date.strftime('%Y-%m-%d') }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-secondary">
+                            <i class="fas fa-info-circle me-2"></i> This user has no active investments.
+                        </div>
+                        {% endif %}
+                        
+                        <h4 class="mb-3">Recent Activity</h4>
+                        {% set recent_transactions = user_to_view.transactions|sort(attribute='created_at', reverse=true)|list|truncate(5, true, false) %}
+                        {% if recent_transactions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in recent_transactions %}
+                                    <tr>
+                                        <td>{{ transaction.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if transaction.transaction_type == 'deposit' %}
+                                            <span class="badge bg-success">Deposit</span>
+                                            {% elif transaction.transaction_type == 'withdrawal' %}
+                                            <span class="badge bg-danger">Withdrawal</span>
+                                            {% elif transaction.transaction_type == 'investment' %}
+                                            <span class="badge bg-primary">Investment</span>
+                                            {% elif transaction.transaction_type == 'investment_return' %}
+                                            <span class="badge bg-info">Return</span>
+                                            {% elif transaction.transaction_type == 'referral' %}
+                                            <span class="badge bg-warning">Referral</span>
+                                            {% elif transaction.transaction_type == 'reward' %}
+                                            <span class="badge bg-secondary">Reward</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">{{ transaction.transaction_type|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if transaction.transaction_type in ['deposit', 'investment_return', 'referral', 'reward', 'refund'] %}
+                                            <span class="text-success">+${{ transaction.amount|round(2) }}</span>
+                                            {% else %}
+                                            <span class="text-danger">-${{ transaction.amount|round(2) }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ transaction.description }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-secondary">
+                            <i class="fas fa-info-circle me-2"></i> This user has no recent transactions.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

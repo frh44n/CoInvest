@@ -1,0 +1,134 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Investment Plans{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Investment Plans</h2>
+            <div class="wallet-badge d-flex align-items-center">
+                <i class="fas fa-wallet me-2"></i>
+                <span>Balance: <strong id="user-balance" data-balance="{{ user.wallet_balance }}">${{ user.wallet_balance|round(2) }}</strong></span>
+                <a href="{{ url_for('user.deposit') }}" class="btn btn-sm btn-success ms-2">
+                    <i class="fas fa-plus"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-5">
+            {% for plan in plans %}
+            <div class="col-md-4">
+                <div class="card h-100 bg-dark border-0 shadow plan-card" data-plan-id="{{ plan.id }}" data-price="{{ plan.price }}">
+                    <div class="card-body p-4 text-center">
+                        <h3 class="card-title plan-name">{{ plan.name }}</h3>
+                        <div class="display-6 my-3 plan-price">${{ plan.price|round(2) }}</div>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">{{ plan.daily_return_percentage }}% Daily Return</li>
+                            <li class="mb-2">{{ plan.duration_days }} Days Duration</li>
+                            <li class="mb-2">Total Return: {{ (plan.daily_return_percentage * plan.duration_days / 100 + 1) * 100|round(2) }}%</li>
+                        </ul>
+                        <p class="text-muted small">{{ plan.description }}</p>
+                        <a href="{{ url_for('user.buy_plan', plan_id=plan.id) }}" class="btn btn-outline-primary mt-3 w-100">
+                            <i class="fas fa-shopping-cart me-2"></i>Buy Now
+                        </a>
+                    </div>
+                    {% if loop.index == 2 %}
+                    <span class="badge bg-warning position-absolute top-0 end-0 mt-3 me-3">POPULAR</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="card bg-dark border-0 shadow mb-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Investment Calculator</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="investment-amount" class="form-label">Investment Amount ($)</label>
+                        <input type="number" class="form-control" id="investment-amount" value="100" min="10" step="10">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="daily-return-rate" class="form-label">Daily Return Rate (%)</label>
+                        <input type="number" class="form-control" id="daily-return-rate" value="2" min="0.1" step="0.1" max="10">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="duration-days" class="form-label">Duration (Days)</label>
+                        <input type="number" class="form-control" id="duration-days" value="30" min="1" max="365">
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row text-center mt-3">
+                    <div class="col-md-4">
+                        <h6>Daily Return</h6>
+                        <div class="display-6 text-success" id="daily-return">$0.00</div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Total Return</h6>
+                        <div class="display-6 text-primary" id="total-return">$0.00</div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Net Profit</h6>
+                        <div class="display-6 text-info" id="net-profit">$0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Investment FAQ</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="investmentFaq">
+                    <div class="accordion-item bg-dark">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                How do investments work?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#investmentFaq">
+                            <div class="accordion-body">
+                                When you purchase an investment plan, the amount is deducted from your wallet balance. Your investment starts generating daily returns right away, which are automatically added to your wallet balance every 24 hours. After the investment period ends, your investment remains in your wallet and you can reinvest or withdraw it.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-dark">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Can I withdraw my investment early?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#investmentFaq">
+                            <div class="accordion-body">
+                                Currently, we do not support early withdrawals of active investments. You will need to wait until the investment period is completed. However, you can withdraw your daily returns that are added to your wallet at any time.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-dark">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                How do referral bonuses work?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#investmentFaq">
+                            <div class="accordion-body">
+                                When someone joins using your referral code and makes an investment, you receive 5% of their investment amount as a referral bonus. This bonus is automatically added to your wallet balance. There's no limit to how many people you can refer or how much you can earn from referrals.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/plans.js') }}"></script>
+{% endblock %}
