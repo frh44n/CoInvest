@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investment Portal{% block title %}{% endblock %}</title>
+    <title>CoInvest{% block title %}{% endblock %}</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
     <!-- Font Awesome for icons -->
@@ -19,7 +19,7 @@
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="{{ url_for('user.index') }}">
                     <i class="fas fa-chart-line me-2"></i>
-                    <span>Investment Portal</span>
+                    <span>CoInvest</span>
                 </a>
                 
                 {% if current_user.is_authenticated %}
@@ -120,7 +120,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <h5 class="mb-3">Investment Portal</h5>
+                    <h5 class="mb-3">CoInvest</h5>
                     <p class="small">A secure platform for growing your investments with daily returns and a powerful referral system.</p>
                 </div>
                 <div class="col-md-3">
@@ -151,7 +151,7 @@
             </div>
             <div class="row mt-3">
                 <div class="col-12 text-center small">
-                    <p class="mb-0">&copy; 2023 Investment Portal. All rights reserved.</p>
+                    <p class="mb-0">&copy; 2023 CoInvest. All rights reserved.</p>
                 </div>
             </div>
         </div>
