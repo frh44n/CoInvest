@@ -55,10 +55,10 @@
                             </li>
                         </ul>
                         
-                        <div class="alert {{ user.wallet_balance >= plan.price ? 'alert-info' : 'alert-danger' }}">
+                        <div class="alert {% if user.wallet_balance >= plan.price %}alert-info{% else %}alert-danger{% endif %}">
                             <div class="d-flex">
                                 <div class="me-2">
-                                    <i class="fas {{ user.wallet_balance >= plan.price ? 'fa-info-circle' : 'fa-exclamation-triangle' }}"></i>
+                                    <i class="fas {% if user.wallet_balance >= plan.price %}fa-info-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
                                 </div>
                                 <div>
                                     {% if user.wallet_balance >= plan.price %}
@@ -77,7 +77,7 @@
                         
                         <form id="purchase-plan-form" action="{{ url_for('user.buy_plan', plan_id=plan.id) }}" method="post">
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary {{ user.wallet_balance < plan.price ? 'disabled' : '' }}" {{ user.wallet_balance < plan.price ? 'disabled' : '' }}>
+                                <button type="submit" class="btn btn-primary {% if user.wallet_balance < plan.price %}disabled{% endif %}" {% if user.wallet_balance < plan.price %}disabled{% endif %}>
                                     <i class="fas fa-check-circle me-2"></i>Confirm Investment
                                 </button>
                             </div>
