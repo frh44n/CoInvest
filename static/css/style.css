@@ -23,6 +23,31 @@ main {
     transform: translateY(-5px);
 }
 
+/* Different gradients for each menu option */
+.dashboard-card:nth-child(1) {
+    background: linear-gradient(135deg, #1e3c72, #2a5298) !important;
+}
+
+.dashboard-card:nth-child(2) {
+    background: linear-gradient(135deg, #4b6cb7, #182848) !important;
+}
+
+.dashboard-card:nth-child(3) {
+    background: linear-gradient(135deg, #0f2027, #203a43) !important;
+}
+
+.dashboard-card:nth-child(4) {
+    background: linear-gradient(135deg, #654ea3, #363795) !important;
+}
+
+.dashboard-card:nth-child(5) {
+    background: linear-gradient(135deg, #3a6186, #1a324f) !important;
+}
+
+.dashboard-card:nth-child(6) {
+    background: linear-gradient(135deg, #ad5389, #3c1053) !important;
+}
+
 /* Investment plan card styles */
 .plan-card {
     border-radius: 10px;
@@ -35,6 +60,19 @@ main {
 .plan-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Different gradients for each plan */
+.plan-card:nth-child(1), .plan-card:nth-of-type(3n+1) {
+    background: linear-gradient(135deg, #1a2c38, #16222a) !important;
+}
+
+.plan-card:nth-child(2), .plan-card:nth-of-type(3n+2) {
+    background: linear-gradient(135deg, #243b55, #141e30) !important;
+}
+
+.plan-card:nth-child(3), .plan-card:nth-of-type(3n+3) {
+    background: linear-gradient(135deg, #2c3e50, #1f2c38) !important;
 }
 
 .plan-card .badge {
