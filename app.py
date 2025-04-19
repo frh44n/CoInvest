@@ -69,7 +69,3 @@ with app.app_context():
 
 
 
-# changes made by farhan
-@app.route("/")
-def home():
-    return redirect(url_for("login"))  # or whatever route is your main page
