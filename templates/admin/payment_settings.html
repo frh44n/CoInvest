@@ -1,0 +1,131 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %} - Payment Settings{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Payment Settings</h2>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+    
+    <div class="card bg-dark border-0 shadow mb-4">
+        <div class="card-header bg-transparent">
+            <h5 class="mb-0">Cryptocurrency Wallet Addresses</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('admin.save_payment_settings') }}" method="post">
+                <div class="row g-4">
+                    <!-- Bitcoin Settings -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark-subtle border h-100">
+                            <div class="card-header bg-transparent">
+                                <h6 class="mb-0"><i class="fab fa-bitcoin text-warning me-2"></i> Bitcoin Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="bitcoin_address" class="form-label">Bitcoin Wallet Address</label>
+                                    <input type="text" class="form-control" id="bitcoin_address" name="bitcoin_address" 
+                                        value="{{ bitcoin_address }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="bitcoin_qr_url" class="form-label">Bitcoin QR Code URL</label>
+                                    <input type="text" class="form-control" id="bitcoin_qr_url" name="bitcoin_qr_url" 
+                                        value="{{ bitcoin_qr_url }}">
+                                    <small class="form-text text-muted">URL to a QR code image of the Bitcoin address</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ethereum Settings -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark-subtle border h-100">
+                            <div class="card-header bg-transparent">
+                                <h6 class="mb-0"><i class="fab fa-ethereum text-info me-2"></i> Ethereum Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="ethereum_address" class="form-label">Ethereum Wallet Address</label>
+                                    <input type="text" class="form-control" id="ethereum_address" name="ethereum_address" 
+                                        value="{{ ethereum_address }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ethereum_qr_url" class="form-label">Ethereum QR Code URL</label>
+                                    <input type="text" class="form-control" id="ethereum_qr_url" name="ethereum_qr_url" 
+                                        value="{{ ethereum_qr_url }}">
+                                    <small class="form-text text-muted">URL to a QR code image of the Ethereum address</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- USDT ERC20 Settings -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark-subtle border h-100">
+                            <div class="card-header bg-transparent">
+                                <h6 class="mb-0"><i class="fas fa-dollar-sign text-success me-2"></i> USDT (ERC20) Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="usdt_erc20_address" class="form-label">USDT ERC20 Wallet Address</label>
+                                    <input type="text" class="form-control" id="usdt_erc20_address" name="usdt_erc20_address" 
+                                        value="{{ usdt_erc20_address }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="usdt_erc20_qr_url" class="form-label">USDT ERC20 QR Code URL</label>
+                                    <input type="text" class="form-control" id="usdt_erc20_qr_url" name="usdt_erc20_qr_url" 
+                                        value="{{ usdt_erc20_qr_url }}">
+                                    <small class="form-text text-muted">URL to a QR code image of the USDT ERC20 address</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- USDT TRC20 Settings -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark-subtle border h-100">
+                            <div class="card-header bg-transparent">
+                                <h6 class="mb-0"><i class="fas fa-dollar-sign text-success me-2"></i> USDT (TRC20) Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="usdt_trc20_address" class="form-label">USDT TRC20 Wallet Address</label>
+                                    <input type="text" class="form-control" id="usdt_trc20_address" name="usdt_trc20_address" 
+                                        value="{{ usdt_trc20_address }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="usdt_trc20_qr_url" class="form-label">USDT TRC20 QR Code URL</label>
+                                    <input type="text" class="form-control" id="usdt_trc20_qr_url" name="usdt_trc20_qr_url" 
+                                        value="{{ usdt_trc20_qr_url }}">
+                                    <small class="form-text text-muted">URL to a QR code image of the USDT TRC20 address</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="alert alert-info">
+        <div class="d-flex">
+            <div class="me-3">
+                <i class="fas fa-info-circle fa-2x"></i>
+            </div>
+            <div>
+                <h5>QR Code Generation</h5>
+                <p class="mb-0">You can use services like <a href="https://www.qr-code-generator.com/" target="_blank" class="text-decoration-none">QR Code Generator</a> or <a href="https://www.qrcode-monkey.com/" target="_blank" class="text-decoration-none">QRCode Monkey</a> to create QR codes for your wallet addresses. After generating a QR code, upload it to an image hosting service and enter the URL here.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from app import db
@@ -59,7 +59,7 @@ def buy_plan(plan_id):
         try:
             # Calculate end date based on plan duration
             start_date = datetime.utcnow()
-            end_date = start_date + datetime.timedelta(days=plan.duration_days)
+            end_date = start_date + timedelta(days=plan.duration_days)
             
             # Create investment
             investment = Investment(
@@ -185,17 +185,25 @@ def deposit():
             db.session.add(deposit)
             db.session.commit()
             
-            # Generate QR code for crypto deposits
-            qr_data = None
-            if payment_method in ['bitcoin', 'ethereum', 'usdt']:
-                # In a real app, generate actual wallet addresses
-                wallet_address = "DEMO_WALLET_ADDRESS_FOR_" + payment_method.upper()
-                qr_data = generate_qr_code(wallet_address)
+            # Get wallet addresses and QR code URLs from settings
+            wallet_address = ""
+            qr_code_url = ""
+            
+            if payment_method == 'bitcoin':
+                wallet_address = SystemSetting.get_value('bitcoin_address', 'DEMO_BTC_ADDRESS')
+                qr_code_url = SystemSetting.get_value('bitcoin_qr_url', 'https://via.placeholder.com/150?text=Bitcoin+QR')
+            elif payment_method == 'ethereum':
+                wallet_address = SystemSetting.get_value('ethereum_address', 'DEMO_ETH_ADDRESS')
+                qr_code_url = SystemSetting.get_value('ethereum_qr_url', 'https://via.placeholder.com/150?text=Ethereum+QR')
+            elif payment_method == 'usdt_erc20':
+                wallet_address = SystemSetting.get_value('usdt_erc20_address', 'DEMO_USDT_ERC20_ADDRESS')
+                qr_code_url = SystemSetting.get_value('usdt_erc20_qr_url', 'https://via.placeholder.com/150?text=USDT+ERC20+QR')
+            elif payment_method == 'usdt_trc20':
+                wallet_address = SystemSetting.get_value('usdt_trc20_address', 'DEMO_USDT_TRC20_ADDRESS')
+                qr_code_url = SystemSetting.get_value('usdt_trc20_qr_url', 'https://via.placeholder.com/150?text=USDT+TRC20+QR')
             
             flash('Deposit request created successfully. Please complete the payment.', 'success')
-            return render_template('deposit_confirmation.html', 
-                                  deposit=deposit, 
-                                  qr_data=qr_data)
+            return redirect(url_for('user.confirm_payment', deposit_id=deposit.id))
             
         except Exception as e:
             db.session.rollback()
@@ -250,10 +258,74 @@ def withdraw():
     
     return render_template('withdraw.html', user=current_user)
 
+@user_bp.route('/payment-confirmation/<int:deposit_id>', methods=['GET', 'POST'])
+@login_required
+def confirm_payment(deposit_id):
+    """Confirm payment for a deposit"""
+    deposit = Deposit.query.get_or_404(deposit_id)
+    
+    # Ensure the deposit belongs to the current user
+    if deposit.user_id != current_user.id:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('user.wallet'))
+    
+    if deposit.status != 'pending':
+        flash('This deposit has already been processed.', 'warning')
+        return redirect(url_for('user.wallet'))
+    
+    if request.method == 'POST':
+        transaction_id = request.form.get('transaction_id')
+        proof_of_payment = request.form.get('proof_of_payment')
+        
+        if not transaction_id:
+            flash('Please provide a transaction ID or hash.', 'danger')
+            return redirect(url_for('user.confirm_payment', deposit_id=deposit_id))
+        
+        try:
+            # Update the deposit with transaction details
+            deposit.transaction_id = transaction_id
+            deposit.proof_of_payment = proof_of_payment
+            
+            db.session.add(deposit)
+            db.session.commit()
+            
+            flash('Payment confirmation submitted successfully. Your deposit will be processed soon.', 'success')
+            return redirect(url_for('user.wallet'))
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error confirming payment: {e}")
+            flash('An error occurred while confirming your payment. Please try again.', 'danger')
+    
+    # Get the appropriate wallet address and QR code for payment method
+    wallet_address = ""
+    if deposit.payment_method == 'bitcoin':
+        wallet_address = SystemSetting.get_value('bitcoin_address', 'DEMO_BTC_ADDRESS')
+    elif deposit.payment_method == 'ethereum':
+        wallet_address = SystemSetting.get_value('ethereum_address', 'DEMO_ETH_ADDRESS')
+    elif deposit.payment_method == 'usdt_erc20':
+        wallet_address = SystemSetting.get_value('usdt_erc20_address', 'DEMO_USDT_ERC20_ADDRESS')
+    elif deposit.payment_method == 'usdt_trc20':
+        wallet_address = SystemSetting.get_value('usdt_trc20_address', 'DEMO_USDT_TRC20_ADDRESS')
+    
+    return render_template('payment_confirmation.html',
+                          deposit=deposit,
+                          wallet_address=wallet_address,
+                          bitcoin_qr_url=SystemSetting.get_value('bitcoin_qr_url', 'https://via.placeholder.com/150?text=Bitcoin+QR'),
+                          ethereum_qr_url=SystemSetting.get_value('ethereum_qr_url', 'https://via.placeholder.com/150?text=Ethereum+QR'),
+                          usdt_erc20_qr_url=SystemSetting.get_value('usdt_erc20_qr_url', 'https://via.placeholder.com/150?text=USDT+ERC20+QR'),
+                          usdt_trc20_qr_url=SystemSetting.get_value('usdt_trc20_qr_url', 'https://via.placeholder.com/150?text=USDT+TRC20+QR'))
+
 @user_bp.route('/claim-reward', methods=['POST'])
 @login_required
 def claim_reward():
     """Claim daily reward"""
+    # Check if user has active investments
+    active_investments = Investment.query.filter_by(user_id=current_user.id, is_active=True).first()
+    if not active_investments:
+        flash('You need to have active investments to claim daily rewards.', 'warning')
+        return redirect(url_for('user.home'))
+    
     if not current_user.can_claim_daily_reward():
         flash('You have already claimed your daily reward today.', 'warning')
         return redirect(url_for('user.home'))
