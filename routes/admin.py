@@ -383,3 +383,71 @@ def delete_plan(plan_id):
         flash('An error occurred while deleting the investment plan.', 'danger')
     
     return redirect(url_for('admin.plans'))
+
+@admin_bp.route('/payment-settings', methods=['GET'])
+@login_required
+@admin_required
+def payment_settings():
+    """Manage payment settings"""
+    # Get current settings
+    bitcoin_address = SystemSetting.get_value('bitcoin_address', '')
+    bitcoin_qr_url = SystemSetting.get_value('bitcoin_qr_url', '')
+    ethereum_address = SystemSetting.get_value('ethereum_address', '')
+    ethereum_qr_url = SystemSetting.get_value('ethereum_qr_url', '')
+    usdt_erc20_address = SystemSetting.get_value('usdt_erc20_address', '')
+    usdt_erc20_qr_url = SystemSetting.get_value('usdt_erc20_qr_url', '')
+    usdt_trc20_address = SystemSetting.get_value('usdt_trc20_address', '')
+    usdt_trc20_qr_url = SystemSetting.get_value('usdt_trc20_qr_url', '')
+    
+    return render_template('admin/payment_settings.html', 
+                          user=current_user,
+                          bitcoin_address=bitcoin_address,
+                          bitcoin_qr_url=bitcoin_qr_url,
+                          ethereum_address=ethereum_address,
+                          ethereum_qr_url=ethereum_qr_url,
+                          usdt_erc20_address=usdt_erc20_address,
+                          usdt_erc20_qr_url=usdt_erc20_qr_url,
+                          usdt_trc20_address=usdt_trc20_address,
+                          usdt_trc20_qr_url=usdt_trc20_qr_url)
+
+
+@admin_bp.route('/save-payment-settings', methods=['POST'])
+@login_required
+@admin_required
+def save_payment_settings():
+    """Save payment settings"""
+    try:
+        # Bitcoin settings
+        bitcoin_address = request.form.get('bitcoin_address')
+        bitcoin_qr_url = request.form.get('bitcoin_qr_url')
+        
+        # Ethereum settings
+        ethereum_address = request.form.get('ethereum_address')
+        ethereum_qr_url = request.form.get('ethereum_qr_url')
+        
+        # USDT ERC20 settings
+        usdt_erc20_address = request.form.get('usdt_erc20_address')
+        usdt_erc20_qr_url = request.form.get('usdt_erc20_qr_url')
+        
+        # USDT TRC20 settings
+        usdt_trc20_address = request.form.get('usdt_trc20_address')
+        usdt_trc20_qr_url = request.form.get('usdt_trc20_qr_url')
+        
+        # Save settings
+        SystemSetting.set_value('bitcoin_address', bitcoin_address)
+        SystemSetting.set_value('bitcoin_qr_url', bitcoin_qr_url)
+        SystemSetting.set_value('ethereum_address', ethereum_address)
+        SystemSetting.set_value('ethereum_qr_url', ethereum_qr_url)
+        SystemSetting.set_value('usdt_erc20_address', usdt_erc20_address)
+        SystemSetting.set_value('usdt_erc20_qr_url', usdt_erc20_qr_url)
+        SystemSetting.set_value('usdt_trc20_address', usdt_trc20_address)
+        SystemSetting.set_value('usdt_trc20_qr_url', usdt_trc20_qr_url)
+        
+        flash('Payment settings saved successfully!', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error saving payment settings: {e}")
+        flash('An error occurred while saving payment settings.', 'danger')
+    
+    return redirect(url_for('admin.payment_settings'))
