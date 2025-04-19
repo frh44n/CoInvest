@@ -31,7 +31,7 @@
                     <div class="mb-4">
                         <label class="form-label">Select Payment Method</label>
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-check payment-method">
                                     <input class="form-check-input" type="radio" name="payment_method" id="bitcoin" value="bitcoin" required checked>
                                     <label class="form-check-label d-flex align-items-center" for="bitcoin">
@@ -39,7 +39,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-check payment-method">
                                     <input class="form-check-input" type="radio" name="payment_method" id="ethereum" value="ethereum" required>
                                     <label class="form-check-label d-flex align-items-center" for="ethereum">
@@ -47,11 +47,19 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-check payment-method">
-                                    <input class="form-check-input" type="radio" name="payment_method" id="usdt" value="usdt" required>
-                                    <label class="form-check-label d-flex align-items-center" for="usdt">
-                                        <i class="fas fa-dollar-sign fa-lg text-success me-2"></i> USDT
+                                    <input class="form-check-input" type="radio" name="payment_method" id="usdt_erc20" value="usdt_erc20" required>
+                                    <label class="form-check-label d-flex align-items-center" for="usdt_erc20">
+                                        <i class="fas fa-dollar-sign fa-lg text-success me-2"></i> USDT (ERC20)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check payment-method">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="usdt_trc20" value="usdt_trc20" required>
+                                    <label class="form-check-label d-flex align-items-center" for="usdt_trc20">
+                                        <i class="fas fa-dollar-sign fa-lg text-success me-2"></i> USDT (TRC20)
                                     </label>
                                 </div>
                             </div>

@@ -1,0 +1,144 @@
+{% extends 'layout.html' %}
+
+{% block title %} - Payment Confirmation{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="mb-4">
+            <a href="{{ url_for('user.deposit') }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Back to Deposit
+            </a>
+        </div>
+        
+        <div class="card bg-dark border-0 shadow">
+            <div class="card-header bg-transparent">
+                <h3 class="mb-0">Payment Instructions</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <div class="d-flex">
+                        <div class="me-2">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Please send <strong>${{ deposit.amount }}</strong> in {{ deposit.payment_method|upper|replace('_', ' ') }} to the address below.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-4">
+                    <div class="mb-3">
+                        {% if deposit.payment_method == 'bitcoin' %}
+                            <i class="fab fa-bitcoin fa-3x text-warning"></i>
+                        {% elif deposit.payment_method == 'ethereum' %}
+                            <i class="fab fa-ethereum fa-3x text-info"></i>
+                        {% elif 'usdt' in deposit.payment_method %}
+                            <i class="fas fa-dollar-sign fa-3x text-success"></i>
+                        {% endif %}
+                    </div>
+                    <h5>{{ deposit.payment_method|upper|replace('_', ' ') }}</h5>
+                </div>
+                
+                <div class="card bg-dark-subtle border mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3 mb-md-0">
+                                {% if deposit.payment_method == 'bitcoin' %}
+                                    <img src="{{ bitcoin_qr_url|default('https://via.placeholder.com/150?text=Bitcoin+QR') }}" alt="Bitcoin QR Code" class="img-fluid" style="max-width: 150px;">
+                                {% elif deposit.payment_method == 'ethereum' %}
+                                    <img src="{{ ethereum_qr_url|default('https://via.placeholder.com/150?text=Ethereum+QR') }}" alt="Ethereum QR Code" class="img-fluid" style="max-width: 150px;">
+                                {% elif deposit.payment_method == 'usdt_erc20' %}
+                                    <img src="{{ usdt_erc20_qr_url|default('https://via.placeholder.com/150?text=USDT+ERC20+QR') }}" alt="USDT ERC20 QR Code" class="img-fluid" style="max-width: 150px;">
+                                {% elif deposit.payment_method == 'usdt_trc20' %}
+                                    <img src="{{ usdt_trc20_qr_url|default('https://via.placeholder.com/150?text=USDT+TRC20+QR') }}" alt="USDT TRC20 QR Code" class="img-fluid" style="max-width: 150px;">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">Wallet Address</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-dark text-light" value="{{ wallet_address }}" id="wallet-address" readonly>
+                                        <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard('wallet-address')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <small class="text-success copy-message" id="wallet-address-copy-message" style="display: none;">Address copied to clipboard!</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Amount</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-dark text-light" value="{{ deposit.amount }}" id="amount" readonly>
+                                        <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard('amount')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <small class="text-success copy-message" id="amount-copy-message" style="display: none;">Amount copied to clipboard!</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form action="{{ url_for('user.confirm_payment', deposit_id=deposit.id) }}" method="post" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <label for="transaction_id" class="form-label">Transaction ID / Hash</label>
+                        <input type="text" class="form-control" id="transaction_id" name="transaction_id" placeholder="Enter the transaction ID or hash" required>
+                        <div class="invalid-feedback">
+                            Please provide the transaction ID or hash.
+                        </div>
+                        <small class="text-muted">This helps us verify your payment faster.</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="proof_of_payment" class="form-label">Proof of Payment (Optional)</label>
+                        <input type="text" class="form-control" id="proof_of_payment" name="proof_of_payment" placeholder="Enter screenshot URL or additional details">
+                        <small class="text-muted">You can provide a screenshot URL or any additional information.</small>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <div class="d-flex">
+                            <div class="me-2">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">Important: Send only {{ deposit.payment_method|upper|replace('_', ' ') }} to this address. Sending any other cryptocurrency may result in permanent loss.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check-circle me-2"></i>I Have Made the Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyToClipboard(elementId) {
+        var element = document.getElementById(elementId);
+        element.select();
+        document.execCommand('copy');
+        
+        // Show the copy message
+        var messageElement = document.getElementById(elementId + '-copy-message');
+        messageElement.style.display = 'block';
+        
+        // Hide the message after 2 seconds
+        setTimeout(function() {
+            messageElement.style.display = 'none';
+        }, 2000);
+    }
+</script>
+{% endblock %}

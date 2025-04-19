@@ -135,3 +135,30 @@ class Referral(db.Model):
     
     def __repr__(self):
         return f'<Referral {self.id} from User {self.referrer_id} to User {self.referred_id}>'
+
+
+class SystemSetting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    setting_key = db.Column(db.String(100), unique=True, nullable=False)
+    setting_value = db.Column(db.Text, nullable=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    @classmethod
+    def get_value(cls, key, default=None):
+        """Get a setting value by key"""
+        setting = cls.query.filter_by(setting_key=key).first()
+        return setting.setting_value if setting else default
+    
+    @classmethod
+    def set_value(cls, key, value):
+        """Set a setting value by key"""
+        setting = cls.query.filter_by(setting_key=key).first()
+        if setting:
+            setting.setting_value = value
+        else:
+            setting = cls(setting_key=key, setting_value=value)
+            db.session.add(setting)
+        db.session.commit()
+        
+    def __repr__(self):
+        return f'<SystemSetting {self.setting_key}>'

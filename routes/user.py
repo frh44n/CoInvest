@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from app import db
-from models import User, Plan, Investment, Transaction, Deposit, Withdrawal, Referral
+from models import User, Plan, Investment, Transaction, Deposit, Withdrawal, Referral, SystemSetting
 from utils.helpers import generate_qr_code, calculate_referral_bonus, format_currency
 from utils.decorators import admin_required
 
