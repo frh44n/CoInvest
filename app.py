@@ -66,3 +66,10 @@ with app.app_context():
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+
+
+
+# changes made by farhan
+@app.route("/")
+def home():
+    return redirect(url_for("login"))  # or whatever route is your main page
